@@ -68,6 +68,28 @@ func (f *Folder) Create(ctx context.Context, name string) (*Folder, error) {
 	return nil, errors.New(strconv.Itoa(r.StatusCode))
 }
 
+func (f *Folder) CreateWithConfig(ctx context.Context, name, xmlConfig string) (*Folder, error) {
+	mode := "com.cloudbees.hudson.plugins.folder.Folder"
+	data := map[string]string{
+		"name":   name,
+		"mode":   mode,
+		"Submit": "OK",
+		"json": makeJson(map[string]string{
+			"name": name,
+			"mode": mode,
+		}),
+	}
+	r, err := f.Jenkins.Requester.PostXML(ctx, f.parentBase()+"/createItem", xmlConfig, f.Raw, data)
+	if err != nil {
+		return nil, err
+	}
+	if r.StatusCode == 200 {
+		f.Poll(ctx)
+		return f, nil
+	}
+	return nil, errors.New(strconv.Itoa(r.StatusCode))
+}
+
 func (f *Folder) Poll(ctx context.Context) (int, error) {
 	response, err := f.Jenkins.Requester.GetJSON(ctx, f.Base, f.Raw, nil)
 	if err != nil {
