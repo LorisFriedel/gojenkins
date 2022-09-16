@@ -5,13 +5,15 @@ import (
 	"encoding/xml"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 //CredentialsManager is utility to control credential plugin
 //Credentials declared by it can be used in jenkins jobs
 type CredentialsManager struct {
-	J      *Jenkins
-	Folder string
+	J          *Jenkins
+	Folder     string
+	FolderPath []string
 }
 
 const baseFolderPrefix = "/job/%s"
@@ -112,6 +114,8 @@ func (cm CredentialsManager) fillURL(url string, params ...interface{}) string {
 	var args []interface{}
 	if cm.Folder != "" {
 		args = []interface{}{fmt.Sprintf(baseFolderPrefix, cm.Folder), "folder"}
+	} else if len(cm.FolderPath) > 0 {
+		args = []interface{}{fmt.Sprintf(baseFolderPrefix, strings.Join(cm.FolderPath, "/job/")), "folder"}
 	} else {
 		args = []interface{}{"", "system"}
 	}
@@ -167,7 +171,6 @@ func (cm CredentialsManager) postCredsXML(ctx context.Context, url string, creds
 	if err != nil {
 		return err
 	}
-
 	return cm.handleResponse(cm.J.Requester.PostXML(ctx, url, string(payload), cm.J.Raw, map[string]string{}))
 }
 

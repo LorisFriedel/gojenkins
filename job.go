@@ -354,7 +354,6 @@ func (j *Job) Copy(ctx context.Context, destinationName string) (*Job, error) {
 }
 
 func (j *Job) UpdateConfig(ctx context.Context, config string) error {
-
 	var querystring map[string]string
 
 	resp, err := j.Jenkins.Requester.PostXML(ctx, j.Base+"/config.xml", config, nil, querystring)

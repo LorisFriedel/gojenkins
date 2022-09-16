@@ -198,6 +198,30 @@ func (j *Jenkins) CreateFolder(ctx context.Context, name string, parents ...stri
 	return folder, nil
 }
 
+// Create a new folder with a given configuration
+// This folder can be nested in other parent folders
+// Example: jenkins.CreateFolderWithConfig("newFolder", "grandparentFolder", "parentFolder")
+func (j *Jenkins) CreateFolderWithConfig(ctx context.Context, name, xmlConfig string, parents ...string) (*Folder, error) {
+	folderObj := &Folder{Jenkins: j, Raw: new(FolderResponse), Base: "/job/" + strings.Join(append(parents, name), "/job/")}
+	folder, err := folderObj.CreateWithConfig(ctx, name, xmlConfig)
+	if err != nil {
+		return nil, err
+	}
+	return folder, nil
+}
+
+// Update am existing folder with a given configuration
+// This folder can be nested in other parent folders
+// Example: jenkins.UpdateFolderWithConfig("newFolder", "grandparentFolder", "parentFolder")
+func (j *Jenkins) UpdateFolderWithConfig(ctx context.Context, name, xmlConfig string, parents ...string) (*Folder, error) {
+	folderObj := &Folder{Jenkins: j, Raw: new(FolderResponse), Base: "/job/" + strings.Join(append(parents, name), "/job/")}
+	folder, err := folderObj.UpdateWithConfig(ctx, name, xmlConfig)
+	if err != nil {
+		return nil, err
+	}
+	return folder, nil
+}
+
 // Create a new job in the folder
 // Example: jenkins.CreateJobInFolder("<config></config>", "newJobName", "myFolder", "parentFolder")
 func (j *Jenkins) CreateJobInFolder(ctx context.Context, config string, jobName string, parentIDs ...string) (*Job, error) {
@@ -210,6 +234,17 @@ func (j *Jenkins) CreateJobInFolder(ctx context.Context, config string, jobName 
 		return nil, err
 	}
 	return job, nil
+}
+
+// Update an existing job in the given folder
+// Example: jenkins.CreateJobInFolder("<config></config>", "newJobName", "myFolder", "parentFolder")
+func (j *Jenkins) UpdateJobInFolder(ctx context.Context, config string, jobName string, parentIDs ...string) (*Job, error) {
+	jobObj := Job{Jenkins: j, Raw: new(JobResponse), Base: "/job/" + strings.Join(append(parentIDs, jobName), "/job/")}
+	err := jobObj.UpdateConfig(ctx, config)
+	if err != nil {
+		return nil, err
+	}
+	return &jobObj, nil
 }
 
 // Create a new job from config File
