@@ -101,7 +101,7 @@ func (f *Folder) UpdateWithConfig(ctx context.Context, name, xmlConfig string) (
 			"mode": mode,
 		}),
 	}
-	r, err := f.Jenkins.Requester.PostXML(ctx, f.parentBase()+"/config.xml", xmlConfig, f.Raw, data)
+	r, err := f.Jenkins.Requester.PostXML(ctx, f.Base+"/config.xml", xmlConfig, f.Raw, data)
 	if err != nil {
 		return nil, err
 	}
